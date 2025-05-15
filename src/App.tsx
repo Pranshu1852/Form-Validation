@@ -1,11 +1,13 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import FormField from './components/FormField';
+import InputField from './components/InputField';
+import TextAreaField from './components/TextAreaField';
 
 function App() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    description: '',
   });
 
   const [submit, setSubmit] = useState(false);
@@ -13,8 +15,13 @@ function App() {
   const errorUserName = useRef('');
   const errorEmail = useRef('');
   const errorPassword = useRef('');
+  const errorDescription = useRef('');
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+  function handleChange(event: ChangeEvent<HTMLInputElement>): void;
+  function handleChange(event: ChangeEvent<HTMLTextAreaElement>): void;
+  function handleChange(
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
     setFormData((prevData) => {
       return {
         ...prevData,
@@ -31,13 +38,14 @@ function App() {
       if (
         errorEmail.current ||
         errorPassword.current ||
-        errorUserName.current
+        errorUserName.current ||
+        errorDescription
       ) {
         setSubmit(false);
       }
 
       if (
-        !(errorEmail.current || errorPassword.current || errorUserName.current)
+        !(errorEmail.current || errorPassword.current || errorUserName.current || errorDescription)
       ) {
         setSubmit(false);
         console.log('form submitted');
@@ -50,7 +58,7 @@ function App() {
       onSubmit={handleSubmit}
       className="flex flex-col gap-5 m-auto w-[50%] mt-20"
     >
-      <FormField
+      <InputField
         label="Username"
         id="username"
         name="username"
@@ -67,7 +75,7 @@ function App() {
         error={errorUserName}
         validationMode="all"
       />
-      <FormField
+      <InputField
         label="Email"
         id="email"
         name="email"
@@ -88,7 +96,7 @@ function App() {
         error={errorEmail}
         validationMode="onChange"
       />
-      <FormField
+      <InputField
         label="Password"
         id="password"
         name="password"
@@ -108,6 +116,30 @@ function App() {
         }}
         error={errorPassword}
         validationMode="onBlur"
+      />
+      <TextAreaField
+        id="description"
+        name="description"
+        placeholder="Enter some description"
+        value={formData.description}
+        onChange={handleChange}
+        rules={{
+          required: {
+            value: true,
+            message: 'This field is required.'
+          },
+          minLength: {
+            value: 10,
+            message: "Minimum length should be 10."
+          },
+          maxLength: {
+            value: 20,
+            message: "Maximum length should be 20."
+          }
+        }}
+        validationMode="all"
+        submit={submit}
+        error={errorDescription}
       />
       <button
         type="submit"

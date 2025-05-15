@@ -12,20 +12,20 @@ interface Rules {
   message: string;
 }
 
-type FormFieldProps = {
+type TextAreaFieldProps = {
   label?: string;
   id: string;
   name: string;
   value: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (value: FocusEvent<HTMLInputElement>) => void;
+  onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onBlur?: (value: FocusEvent<HTMLTextAreaElement>) => void;
   rules?: Record<string, Rules>;
   error?: RefObject<string>;
   validationMode: 'onChange' | 'onBlur' | 'all';
   submit: boolean;
-} & React.HTMLProps<HTMLInputElement>;
+} & React.HTMLProps<HTMLTextAreaElement>;
 
-function FormField({
+function TextAreaField({
   label,
   id,
   placeholder,
@@ -37,7 +37,7 @@ function FormField({
   submit,
   validationMode,
   ...props
-}: FormFieldProps) {
+}: TextAreaFieldProps) {
   const [isFocus, setIsFocus] = useState(false);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function FormField({
     }
   }, [submit]);
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+  function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const inputValue = event.target.value;
     if (
       validationMode &&
@@ -57,7 +57,7 @@ function FormField({
     onChange(event);
   }
 
-  function handleBlur(event: FocusEvent<HTMLInputElement>) {
+  function handleBlur(event: FocusEvent<HTMLTextAreaElement>) {
     setIsFocus(true);
 
     if (
@@ -95,7 +95,7 @@ function FormField({
           )}
         </label>
       )}
-      <input
+      <textarea
         className="border-[1.5px] border-black rounded-md p-2"
         type="text"
         id={id}
@@ -112,4 +112,4 @@ function FormField({
   );
 }
 
-export default FormField;
+export default TextAreaField;
