@@ -5,40 +5,41 @@ import {
   type FocusEvent,
 } from 'react';
 import { ErrorCheck } from '../utils/validation';
+import type { InputRef } from './InputField';
 
 interface Rules {
   value: boolean | number | string | RegExp;
   message: string;
 }
 
-type InputFieldProps = {
-  label?: string;
+interface Option {
+  label: string;
+  value: string;
+}
+
+type RadioGroupFieldProps = {
+  label: string;
   id: string;
   name: string;
-  placeholder: string;
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (value: FocusEvent<HTMLInputElement>) => void;
+  options: Array<Option>;
   rules?: Record<string, Rules>;
   validationMode: 'onChange' | 'onBlur' | 'all';
   ref: (element: InputRef | null) => void;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (value: FocusEvent<HTMLInputElement>) => void;
 };
 
-export type InputRef = {
-  validation: () => { error: string; isError: boolean };
-  value: string;
-};
-
-function InputField({
+function RadioGroupField({
   label,
   id,
-  placeholder,
+  name,
+  options,
   onChange,
   onBlur,
   rules,
   validationMode,
   ref,
-  ...props
-}: InputFieldProps) {
+}: RadioGroupFieldProps) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
 
@@ -109,14 +110,20 @@ function InputField({
           )}
         </label>
       )}
-      <input
-        className="border-[1.5px] border-black rounded-md p-2"
-        value={value}
-        placeholder={placeholder}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        {...props}
-      />
+      <div className="flex flex-row gap-2">
+        {options.map((element) => {
+          return (
+            <RadioField
+              key={element.value + element.label}
+              label={element.label}
+              name={name}
+              value={element.value}
+              changeEvent={handleChange}
+              blurEvent={handleBlur}
+            />
+          );
+        })}
+      </div>
       {error !== '' && (
         <p className="text-red-600 font-medium text-sm">{error}</p>
       )}
@@ -124,4 +131,34 @@ function InputField({
   );
 }
 
-export default InputField;
+type RadioFieldProps = {
+  label: string;
+  name: string;
+  value: string;
+  changeEvent: (event: ChangeEvent<HTMLInputElement>) => void;
+  blurEvent: (event: FocusEvent<HTMLInputElement>) => void;
+};
+
+function RadioField({
+  label,
+  name,
+  value,
+  changeEvent,
+  blurEvent,
+}: RadioFieldProps) {
+  return (
+    <div className="flex flex-row gap-3 items-center">
+      <input
+        id={value}
+        name={name}
+        type="radio"
+        value={value}
+        onChange={changeEvent}
+        onBlur={blurEvent}
+      />
+      <label htmlFor={value}>{label}</label>
+    </div>
+  );
+}
+
+export default RadioGroupField;

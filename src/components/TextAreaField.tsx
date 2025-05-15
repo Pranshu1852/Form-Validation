@@ -1,9 +1,8 @@
-import React, {
-  useEffect,
+import {
+  useImperativeHandle,
   useState,
   type ChangeEvent,
   type FocusEvent,
-  type RefObject,
 } from 'react';
 import { ErrorCheck } from '../utils/validation';
 
@@ -16,50 +15,62 @@ type TextAreaFieldProps = {
   label?: string;
   id: string;
   name: string;
-  value: string;
-  onChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder: string;
+  onChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onBlur?: (value: FocusEvent<HTMLTextAreaElement>) => void;
   rules?: Record<string, Rules>;
-  error?: RefObject<string>;
   validationMode: 'onChange' | 'onBlur' | 'all';
-  submit: boolean;
-} & React.HTMLProps<HTMLTextAreaElement>;
+  ref: (element: InputRef | null) => void;
+};
+
+export type InputRef = {
+  validation: () => { error: string; isError: boolean };
+  value: string;
+};
 
 function TextAreaField({
   label,
   id,
   placeholder,
-  value,
   onChange,
   onBlur,
   rules,
-  error,
-  submit,
   validationMode,
+  ref,
   ...props
 }: TextAreaFieldProps) {
-  const [isFocus, setIsFocus] = useState(false);
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (submit && rules && !isFocus) {
-      CheckError(value);
-    }
-  }, [submit]);
+  useImperativeHandle(ref, () => {
+    return {
+      validation: () => {
+        const errormessage = CheckError(value);
+        return {
+          error: errormessage,
+          isError: errormessage !== '',
+        };
+      },
+      value,
+    };
+  });
 
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const inputValue = event.target.value;
+    setValue(inputValue);
     if (
       validationMode &&
       (validationMode === 'all' || validationMode === 'onChange')
     ) {
       CheckError(inputValue);
     }
-    onChange(event);
+
+    if (onChange) {
+      onChange(event);
+    }
   }
 
   function handleBlur(event: FocusEvent<HTMLTextAreaElement>) {
-    setIsFocus(true);
-
     if (
       validationMode &&
       (validationMode === 'all' || validationMode === 'onBlur')
@@ -74,7 +85,7 @@ function TextAreaField({
 
   function CheckError(inputVal: string) {
     if (rules) {
-      error!.current = (function isError(): string {
+      const errorMessage = (function isError(): string {
         for (const rule of Object.keys(rules)) {
           if (ErrorCheck(rule, rules[rule].value, inputVal)) {
             return rules[rule].message;
@@ -82,7 +93,10 @@ function TextAreaField({
         }
         return '';
       })();
+      setError(errorMessage);
+      return errorMessage;
     }
+    return '';
   }
 
   return (
@@ -97,16 +111,14 @@ function TextAreaField({
       )}
       <textarea
         className="border-[1.5px] border-black rounded-md p-2"
-        type="text"
-        id={id}
-        placeholder={placeholder}
         value={value}
+        placeholder={placeholder}
         onChange={handleChange}
         onBlur={handleBlur}
         {...props}
       />
-      {error?.current !== '' && (
-        <p className="text-red-600 font-medium text-sm">{error?.current}</p>
+      {error !== '' && (
+        <p className="text-red-600 font-medium text-sm">{error}</p>
       )}
     </div>
   );
