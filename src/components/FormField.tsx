@@ -1,4 +1,10 @@
-import React, { useEffect, useState, type ChangeEvent, type FocusEvent, type RefObject } from 'react';
+import React, {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+  type RefObject,
+} from 'react';
 import { ErrorCheck } from '../utils/validation';
 
 interface Rules {
@@ -7,17 +13,17 @@ interface Rules {
 }
 
 type FormFieldProps = {
-  label: string;
-  placeholder: string;
+  label?: string;
   id: string;
+  name: string;
   value: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (value: string) => void;
+  onBlur?: (value: FocusEvent<HTMLInputElement>) => void;
   rules?: Record<string, Rules>;
-  error?: RefObject<string>,
-  submit: boolean
+  error?: RefObject<string>;
+  validationMode: 'onChange' | 'onBlur' | 'all';
+  submit: boolean;
 } & React.HTMLProps<HTMLInputElement>;
-
 
 function FormField({
   label,
@@ -29,26 +35,49 @@ function FormField({
   rules,
   error,
   submit,
+  validationMode,
   ...props
 }: FormFieldProps) {
-    useEffect(()=>{
-      if(submit&&rules){
-        CheckError(value);
-      }
-    },[submit])
+  const [isFocus, setIsFocus] = useState(false);
+
+  useEffect(() => {
+    if (submit && rules && !isFocus) {
+      CheckError(value);
+    }
+  }, [submit]);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const inputValue = event.target.value;
-    CheckError(inputValue);
+    if (
+      validationMode &&
+      (validationMode === 'all' || validationMode === 'onChange')
+    ) {
+      CheckError(inputValue);
+    }
     onChange(event);
+  }
+
+  function handleBlur(event: FocusEvent<HTMLInputElement>) {
+    setIsFocus(true);
+
+    if (
+      validationMode &&
+      (validationMode === 'all' || validationMode === 'onBlur')
+    ) {
+      CheckError(event.target.value);
+    }
+
+    if (onBlur) {
+      onBlur(event);
+    }
   }
 
   function CheckError(inputVal: string) {
     if (rules) {
       error!.current = (function isError(): string {
-        for (let a of Object.keys(rules)) {
-          if (ErrorCheck(a, rules[a].value, inputVal)) {
-            return rules[a].message;
+        for (const rule of Object.keys(rules)) {
+          if (ErrorCheck(rule, rules[rule].value, inputVal)) {
+            return rules[rule].message;
           }
         }
         return '';
@@ -58,9 +87,14 @@ function FormField({
 
   return (
     <div className="flex flex-col gap-2 self-start w-full">
-      <label className="text-lg font-medium" htmlFor={id}>
-        {label}
-      </label>
+      {label && (
+        <label className="text-lg font-medium" htmlFor={id}>
+          {label}
+          {rules && rules.required && rules.required.value && (
+            <span className="text-red-600"> *</span>
+          )}
+        </label>
+      )}
       <input
         className="border-[1.5px] border-black rounded-md p-2"
         type="text"
@@ -68,6 +102,7 @@ function FormField({
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
+        onBlur={handleBlur}
         {...props}
       />
       {error?.current !== '' && (
@@ -78,5 +113,3 @@ function FormField({
 }
 
 export default FormField;
-
- 

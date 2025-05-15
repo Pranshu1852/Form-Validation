@@ -6,29 +6,29 @@ function isEmail(val: string) {
 function ErrorCheck(
   key: string,
   value: boolean | string | number | RegExp,
-  inputValue: string,
+  inputValue: string
 ) {
   switch (key) {
-    case "required": {
+    case 'required': {
       if (value) {
         return inputValue.trim().length === 0;
       }
       break;
     }
-    case "minLength": {
-      if (typeof value === "number") {
+    case 'minLength': {
+      if (typeof value === 'number') {
         return inputValue.length <= value;
       }
       break;
     }
-    case "maxLength": {
-      if (typeof value === "number") {
+    case 'maxLength': {
+      if (typeof value === 'number') {
         return inputValue.length >= value;
       }
       break;
     }
-    case "pattern": {
-      if (typeof value === "object") {
+    case 'pattern': {
+      if (typeof value === 'object') {
         return !value.test(inputValue);
       }
       break;

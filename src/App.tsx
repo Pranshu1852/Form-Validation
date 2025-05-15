@@ -1,18 +1,18 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import FormField from "./components/FormField";
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import FormField from './components/FormField';
 
 function App() {
   const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
+    username: '',
+    email: '',
+    password: '',
   });
 
-  const [submit,setSubmit]=useState(false);
+  const [submit, setSubmit] = useState(false);
 
-  const errorUserName = useRef("");
-  const errorEmail = useRef("");
-  const errorPassword = useRef("");
+  const errorUserName = useRef('');
+  const errorEmail = useRef('');
+  const errorPassword = useRef('');
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setFormData((prevData) => {
@@ -23,24 +23,33 @@ function App() {
     });
   }
 
-  function handleSubmit(event: FormEvent){
+  function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmit(true);
 
-    setTimeout(()=>{
-      if((errorEmail.current||errorPassword.current||errorUserName.current)){
+    setTimeout(() => {
+      if (
+        errorEmail.current ||
+        errorPassword.current ||
+        errorUserName.current
+      ) {
         setSubmit(false);
       }
 
-      if(!(errorEmail.current||errorPassword.current||errorUserName.current)){
+      if (
+        !(errorEmail.current || errorPassword.current || errorUserName.current)
+      ) {
         setSubmit(false);
-        console.log("form submitted");
+        console.log('form submitted');
       }
-    },100)
+    }, 100);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 m-auto w-[50%] mt-20">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-5 m-auto w-[50%] mt-20"
+    >
       <FormField
         label="Username"
         id="username"
@@ -50,16 +59,13 @@ function App() {
         submit={submit}
         value={formData.username}
         rules={{
-          required: {
-            value: true,
-            message: "This field is required."
-          },
           minLength: {
             value: 5,
-            message: "Minimum length should be 5."
-          }
+            message: 'Minimum length should be 5.',
+          },
         }}
         error={errorUserName}
+        validationMode="all"
       />
       <FormField
         label="Email"
@@ -72,7 +78,7 @@ function App() {
         rules={{
           required: {
             value: true,
-            message: "This field is required."
+            message: 'This field is required.',
           },
           pattern: {
             value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -80,6 +86,7 @@ function App() {
           },
         }}
         error={errorEmail}
+        validationMode="onChange"
       />
       <FormField
         label="Password"
@@ -89,9 +96,25 @@ function App() {
         onChange={handleChange}
         submit={submit}
         value={formData.password}
+        rules={{
+          required: {
+            value: true,
+            message: 'This field is required.',
+          },
+          minLength: {
+            value: 8,
+            message: 'Password length should be atleast 8.',
+          },
+        }}
         error={errorPassword}
+        validationMode="onBlur"
       />
-      <button type="submit" className="bg-black px-4 py-2 rounded-lg text-white">Submit</button>
+      <button
+        type="submit"
+        className="bg-black px-4 py-2 rounded-lg text-white"
+      >
+        Submit
+      </button>
     </form>
   );
 }
