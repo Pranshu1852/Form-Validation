@@ -31,9 +31,11 @@ function FormField({
   submit,
   ...props
 }: FormFieldProps) {
-    if(submit&&rules&&rules.required&&rules.required.value){
-        error!.current=rules.required.message;
-    }
+    useEffect(()=>{
+      if(submit&&rules){
+        CheckError(value);
+      }
+    },[submit])
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const inputValue = event.target.value;
@@ -42,8 +44,6 @@ function FormField({
   }
 
   function CheckError(inputVal: string) {
-    console.log(error);
-
     if (rules) {
       error!.current = (function isError(): string {
         for (let a of Object.keys(rules)) {
