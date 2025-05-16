@@ -1,35 +1,102 @@
-import { useRef, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import InputField, { type InputRef } from './components/InputField';
 import RadioGroupField from './components/RadioGroupField';
 import TextAreaField from './components/TextAreaField';
+import InfiniteSelect from './components/CustomSelect';
+
+
+const languageOptions=[
+  {
+    label: 'English',
+    value: 'en',
+  },
+  {
+    label: 'Gujarati',
+    value: 'gu',
+  },
+  {
+    label: 'Hindi',
+    value: 'hi',
+  },
+  {
+    label: 'French',
+    value: 'fr'
+  },
+  {
+    label: 'Arabic',
+    value: 'ar'
+  },
+  {
+    label: 'Germen',
+    value: 'ge'
+  },
+  {
+    label: 'Bhojpuri',
+    value: 'bh'
+  },
+  {
+    label: 'Marathi',
+    value: 'ma'
+  },
+  {
+    label: 'Bihari',
+    value: 'bh'
+  },
+  {
+    label: 'Portuguese',
+    value: 'po'
+  },
+  {
+    label: 'Punjabi',
+    value: 'pu'
+  },
+  {
+    label: 'Spanish',
+    value: 'sp'
+  },
+  {
+    label: 'Chinese',
+    value: 'ch'
+  },
+  {
+    label: 'Bengali',
+    value: 'be'
+  },
+  {
+    label: 'Tamil',
+    value: 'ta'
+  }
+]
+
+type LanguageArray=typeof languageOptions;
 
 function App() {
-  // const [formData, setFormData] = useState({
-  //   username: '',
-  //   email: '',
-  //   password: '',
-  //   description: '',
-  // });
+  const [languages,setLanguages]=useState<LanguageArray>([]);
 
-  // const [submit, setSubmit] = useState(false);
+  function fetchLanguage() {
+    
+    let newArray=[...languages];
+    const end=(languageOptions.length-newArray.length) <= 5 ? languageOptions.length : newArray.length+5;
+    console.log(end);
+    console.log(newArray.length);
+    
+    
+    for(let i=newArray.length;i<end;i++){
+      console.log('runnnig');
+      newArray.push(languageOptions[i]);
+    }
+    setLanguages(newArray);
+  }
+
+  useEffect(()=>{
+    fetchLanguage();
+  },[])
+
   const formRefs = useRef<Record<string, InputRef | null>>({});
 
   const registerRef = (name: string) => (element: InputRef | null) => {
     formRefs.current[name] = element;
   };
-
-  // function handleChange(event: ChangeEvent<HTMLInputElement>): void;
-  // function handleChange(event: ChangeEvent<HTMLTextAreaElement>): void;
-  // function handleChange(
-  //   event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  // ) {
-  //   setFormData((prevData) => {
-  //     return {
-  //       ...prevData,
-  //       [event.target.name]: event.target.value,
-  //     };
-  //   });
-  // }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -149,6 +216,20 @@ function App() {
           },
         }}
         validationMode="onBlur"
+      />
+      <InfiniteSelect
+        label="Choose language"
+        id="language"
+        ref={registerRef('language')}
+        validationMode="all"
+        rules={{
+          required: {
+            value: true,
+            message: 'This field is required.',
+          },
+        }}
+        options={languages}
+        onLoadMore={fetchLanguage}
       />
       <button
         type="submit"
